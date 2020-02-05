@@ -1,5 +1,5 @@
-
 import os
+import datetime
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -16,22 +16,32 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'todos.apps.TodosConfig',
+
     'rest_framework',
     'rest_framework.authtoken',
-    'crispy_forms',
+    'model_utils',
+
+    'todos.apps.TodosConfig',
 ]
 
 AUTH_USER_MODEL = 'todos.CustomUser'
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
+JWT_AUTH = {
+ 
+    'JWT_VERIFY': True,
+    'JWT_VERIFY_EXPIRATION': True,
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=3000),
+}
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     )
 }
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

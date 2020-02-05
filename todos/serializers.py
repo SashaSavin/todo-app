@@ -1,24 +1,22 @@
-from rest_framework import serializers, generics
-from . import models
-from . models import CustomUser
-from rest_framework.authtoken.models import Token
+import datetime
 
+from rest_framework import serializers
 
-class TodoSerializer(serializers.ModelSerializer):
-    class Meta:
-        fields = (
-            'user',
-            'text',
-            'completed',
-        )
-        model = models.Todo
+from todos.models import CustomUser, Todo
 
 
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ('username', 'email', 'password')
+        fields = [
+            'uuid',
+            'username', 
+            'email', 
+            'password',
+            'created',
+            'modified',
+        ]
         extra_kwargs = {'password': {'write_only': True}}
 
         def create(self, validated_data):
@@ -28,13 +26,34 @@ class UserSerializer(serializers.ModelSerializer):
             )
             user.set_password(validated_data['password'])
             user.save()
-            Token.objects.create(user=user)
             return user
 
 
-class UserCreate(generics.CreateAPIView):
-    authentication_classes = ()
-    permission_classes = ()
-    serializer_class = UserSerializer
+class BaseTodoSerializer(serializers.ModelSerializer):
+    complete_time = serializers.SerializerMethodField()
+
+    class Meta:
+        fields = [
+            'uuid',
+            'user',
+            'text',
+            'completed',
+            'complete_time',
+            'date_completed'
+        ]
+        model = Todo
+
+    def get_complete_time(self, obj):
+        if obj.completed and obj.date_completed:
+            return (obj.date_completed - obj.created).total_seconds()
+        return "Not completed"
 
 
+class TodoSerializer(BaseTodoSerializer):
+    class Meta(BaseTodoSerializer.Meta):
+        fields = BaseTodoSerializer.Meta.fields + [
+            'created',
+            'modified',
+            'date_completed',
+            'is_active',
+        ]
