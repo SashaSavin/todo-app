@@ -20,3 +20,4 @@ urlpatterns = [
     path('admin/', admin.site.urls), # путь к админ-панели
     path('', include('todos.urls')), # путь к ссылкам приложения todos
 ]
+
